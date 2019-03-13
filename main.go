@@ -32,6 +32,25 @@ func GetPersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&Person{})
 }
 
+func UpdatePersonNameEndpoint(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	decoder := json.NewDecoder(r.Body)
+
+	var updatePerson Person
+	err := decoder.Decode(&updatePerson)
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < len(people); i++ {
+		if people[i].ID == params["id"] {
+			people[i].Firstname = updatePerson.Firstname
+			people[i].Lastname = updatePerson.Lastname
+			people[i].Address = updatePerson.Address
+
+		}
+	}
+}
+
 func GetPeopleEndpoint(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(people)
 }
@@ -44,10 +63,6 @@ func CreatePersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	people = append(people, person)
 	json.NewEncoder(w).Encode(people)
 }
-
-// func UpdatePersonNameEndpoint(w http.ResponseWriter, r *http.Request) {
-// 	params := mux.Vars(r)
-// }
 
 func DeletePersonEndpoint(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -67,6 +82,7 @@ func main() {
 	router.HandleFunc("/people", GetPeopleEndpoint).Methods("GET")
 	router.HandleFunc("/people/{id}", GetPersonEndpoint).Methods("GET")
 	router.HandleFunc("/people/{id}", CreatePersonEndpoint).Methods("POST")
+	router.HandleFunc("/people/{id}", UpdatePersonNameEndpoint).Methods("PUT")
 	router.HandleFunc("/people/{id}", DeletePersonEndpoint).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
